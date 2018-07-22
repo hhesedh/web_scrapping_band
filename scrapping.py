@@ -5,7 +5,6 @@ import os
 import json
 import sys
 def baixa_pagina(url):
-    # Alterar nome da pagina dentro de urlopen("")
     html = urlopen(url)
     res = BeautifulSoup(html.read(), "html.parser")
     arquivo = res.findAll("script")
