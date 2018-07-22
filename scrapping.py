@@ -35,6 +35,8 @@ def converte_json_em_dicionario(url):
             elif chave == "id":
                 id = str(valor) + ".mp3"
             elif chave == "file":
+                if valor == None:
+                    continue
                 urls[id] = [valor["mp3-128"], titulo]
     return urls
 
