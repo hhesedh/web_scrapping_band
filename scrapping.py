@@ -4,14 +4,15 @@ from urllib.request import Request, urlopen
 import os
 import json
 import sys
+
 def baixa_pagina(url):
     html = urlopen(url)
     res = BeautifulSoup(html.read(), "html.parser")
-    arquivo = res.findAll("script")
-
-    with open("temp.txt", "w") as temp:
-        temp.write(str(arquivo))
-
+    arquivo = "".join([p.text for p in res.findAll("script")])
+    arquivo = arquivo.splitlines(True)
+    with open("temp.txt", "w", encoding='utf-8') as temp:
+        for linha in arquivo:
+            temp.write(linha)
 
 def recupera_json():
     with open("temp.txt", "r") as arquivo:
