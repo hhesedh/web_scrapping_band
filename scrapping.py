@@ -50,6 +50,7 @@ def baixa_musicas(urls, nome_pasta):
     for nome, url in urls.items():
         urllib.request.urlretrieve(url[0], nome)
         os.rename(nome, nome_pasta + "/" + url[1] + ".mp3")
+        print("baixando faixa", url[1])
 
 
 def produz_nome_pasta():
