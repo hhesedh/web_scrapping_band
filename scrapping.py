@@ -48,9 +48,11 @@ def baixa_musicas(urls, nome_pasta):
     opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
     urllib.request.install_opener(opener)
     for nome, url in urls.items():
+        print("baixando faixa", url[1] + "...")
         urllib.request.urlretrieve(url[0], nome)
         os.rename(nome, nome_pasta + "/" + url[1] + ".mp3")
-        print("baixando faixa", url[1])
+    
+    print("Fim :)")
 
 
 def produz_nome_pasta():
