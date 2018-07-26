@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib.request
-from urllib.request import Request, urlopen
+from urllib.request import urlopen
 import os
 import json
 import sys
@@ -23,7 +23,7 @@ def recupera_json():
                 return linha.replace('trackinfo:', "").replace(" ", "")[:-2]
 
 
-def converte_json_em_dicionario(url):               
+def converte_json_em_dicionario(url):
     titulo = ""
     id = ""
     urls = {}
@@ -31,13 +31,13 @@ def converte_json_em_dicionario(url):
     arquivo = json.loads(url)
 
     for linha in arquivo:
-        for  chave, valor in linha.items():
+        for chave, valor in linha.items():
             if chave == "title":
                 titulo = valor.replace("/", "")
             elif chave == "id":
                 id = str(valor) + ".mp3"
             elif chave == "file":
-                if valor == None:
+                if valor is None:
                     continue
                 urls[id] = [valor["mp3-128"], titulo]
     return urls
@@ -45,13 +45,18 @@ def converte_json_em_dicionario(url):
 
 def baixa_musicas(urls, nome_pasta):
     opener = urllib.request.build_opener()
-    opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+    browsers = []
+    browsers.append('Mozilla/5.0 (Windows NT 6.1; WOW64)')
+    browsers.append('AppleWebKit/537.36 (KHTML, like Gecko)')
+    browsers.append('Chrome/36.0.1941.0 Safari/537.36')
+    browsers = " ".join(browsers)
+    opener.addheaders = [('User-Agent', browsers)]
     urllib.request.install_opener(opener)
     for nome, url in urls.items():
         print("baixando faixa", url[1] + "...")
         urllib.request.urlretrieve(url[0], nome)
         os.rename(nome, nome_pasta + "/" + url[1] + ".mp3")
-    
+
     print("Fim :)")
 
 
@@ -66,10 +71,12 @@ def produz_nome_pasta():
             if "EmbedData" in linha:
                 validador_linha = True
             elif "album_title:" in linha and validador_linha:
-                album = linha.replace("album_title: ", "").replace(",", "").replace('"', '').strip()
+                album = linha.replace("album_title: ", "").replace(",", "")
+                album = album.replace('"', '').strip()
             elif "artist:" in linha and validador_linha:
-                banda = linha.replace("artist: ", "").replace(",", "").replace('"', '').strip()
-                nome_pasta = banda  + " - " + album
+                banda = linha.replace("artist: ", "").replace(",", "")
+                banda = banda.replace('"', '').strip()
+                nome_pasta = banda + " - " + album
                 return nome_pasta.replace("/", "")
 
 
