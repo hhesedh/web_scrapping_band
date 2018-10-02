@@ -1,10 +1,8 @@
 from bs4 import BeautifulSoup
 import urllib.request
 from urllib.request import urlopen
-import os
 import json
-import sys
-
+import os
 
 def baixa_pagina(url):
     html = urlopen(url)
@@ -24,32 +22,27 @@ def recupera_json():
 
 
 def converte_json_em_dicionario(url):
-    titulo = ""
-    id = ""
+    arquivo = json.loads(url)
     urls = {}
 
-    arquivo = json.loads(url)
+    for dicionario in arquivo:
+        if dicionario['file'] is None:
+            continue
 
-    for linha in arquivo:
-        for chave, valor in linha.items():
-            if chave == "title":
-                titulo = valor.replace("/", "")
-            elif chave == "id":
-                id = str(valor) + ".mp3"
-            elif chave == "file":
-                if valor is None:
-                    continue
-                urls[id] = [valor["mp3-128"], titulo]
+        titulo = dicionario['title'].replace("/", "")
+        id = str(dicionario['id']) + '.mp3'
+        path = dicionario['file']['mp3-128']
+
+        urls[id] = [path, titulo]
+
     return urls
-
 
 def baixa_musicas(urls, nome_pasta):
     opener = urllib.request.build_opener()
-    browsers = []
-    browsers.append('Mozilla/5.0 (Windows NT 6.1; WOW64)')
-    browsers.append('AppleWebKit/537.36 (KHTML, like Gecko)')
-    browsers.append('Chrome/36.0.1941.0 Safari/537.36')
-    browsers = " ".join(browsers)
+    firefox = 'Mozilla/5.0 (Windows NT 6.1; WOW64)'
+    apple = 'AppleWebKit/537.36 (KHTML, like Gecko)'
+    chrome = 'Chrome/36.0.1941.0 Safari/537.36'
+    browsers = " ".join([firefox, apple, chrome])
     opener.addheaders = [('User-Agent', browsers)]
     urllib.request.install_opener(opener)
     for nome, url in urls.items():
@@ -61,32 +54,11 @@ def baixa_musicas(urls, nome_pasta):
 
 
 def produz_nome_pasta():
-    validador_linha = False
-    album = ""
-    banda = ""
-    nome_pasta = ""
-
     with open("temp.txt", "r", encoding="utf-8") as temp:
         for linha in temp:
-            if "EmbedData" in linha:
-                validador_linha = True
-            elif "album_title:" in linha and validador_linha:
-                album = linha.replace("album_title: ", "").replace(",", "")
-                album = album.replace('"', '').strip()
-            elif "artist:" in linha and validador_linha:
-                banda = linha.replace("artist: ", "").replace(",", "")
-                banda = banda.replace('"', '').strip()
+            if "album_title:" in linha:
+                album = linha.split('"')[1]
+            elif "artist:" in linha:
+                banda = linha.split('"')[1]
                 nome_pasta = banda + " - " + album
                 return nome_pasta.replace("/", "")
-
-
-if ("bandcamp" in sys.argv[1]):
-    baixa_pagina(sys.argv[1])
-    url = recupera_json()
-    urls = converte_json_em_dicionario(url)
-    nome_pasta = produz_nome_pasta()
-    os.mkdir(nome_pasta)
-    baixa_musicas(urls, nome_pasta)
-    os.remove("temp.txt")
-else:
-    print("Digite um arquivo")
